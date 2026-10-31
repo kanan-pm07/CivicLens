@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}CivicLens{% endblock %} · CivicLens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head><body>
+<nav class="nav"><a class="brand" href="/"><span class="brand-icon">C</span> civic<span>lens</span></a><div class="navlinks"><a href="/map">Issue map</a><a href="/reports">Explore reports</a><a href="/track">Track issue</a><a href="/admin">Demo admin</a><a class="nav-cta" href="/report">+ Report an issue</a></div><button class="menu" onclick="document.querySelector('.navlinks').classList.toggle('show')">☰</button></nav>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-wrap">{% for category,message in messages %}<div class="flash {{category}}">{{message}}</div>{% endfor %}</div>{% endif %}{% endwith %}
+<main>{% block content %}{% endblock %}</main><footer><div class="brand"><span class="brand-icon">C</span> civic<span>lens</span></div><p>Better evidence. Clearer reports. Stronger communities.</p><small>Community prototype · Not an official government service</small></footer>
+<script src="{{ url_for('static', filename='app.js') }}"></script>{% block scripts %}{% endblock %}</body></html>

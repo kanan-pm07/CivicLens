@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% block title %}Report an issue{% endblock %}{% block content %}
+<section class="page-head"><div class="eyebrow">COMMUNITY REPORTING</div><h1>Let's make it <em>visible.</em></h1><p>Share what you saw. CivicLens will help turn it into a clear report.</p></section>
+<form class="form-shell" method="post" enctype="multipart/form-data"><div class="form-main"><div class="form-title"><span>01</span><div><h2>What did you notice?</h2><p>Describe the issue in your own words. A photo helps AI understand the context.</p></div></div>
+<label class="upload-box" for="photo"><input id="photo" type="file" name="photo" accept="image/png,image/jpeg,image/webp"><span class="upload-icon">↑</span><b>Drop a photo here or <u>browse files</u></b><small>JPG, PNG or WEBP · Max 8 MB</small><img id="preview" alt="Image preview" hidden></label>
+<label class="field-label" for="description">Describe the issue <span>Required if no photo</span></label><textarea id="description" name="description" rows="4" placeholder="Example: There is a deep pothole near the bus stop. Vehicles are swerving around it, especially at night."></textarea>
+<div class="form-title second"><span>02</span><div><h2>Where is it happening?</h2><p>A street name or nearby landmark is enough to start.</p></div></div>
+<label class="field-label" for="location">Location / nearby landmark</label><input id="location" name="location" placeholder="e.g. Near KIIT Square, Patia, Bhubaneswar"><div class="two-fields"><div><label class="field-label" for="ward">Ward (optional)</label><input id="ward" name="ward" placeholder="Ward number"></div><div><label class="field-label" for="language">Complaint language</label><select id="language" name="language"><option>English</option><option>Odia</option><option>Hindi</option></select></div></div>
+
+<div class="two-fields">
+    <div>
+        <label class="field-label">Latitude</label>
+        <input
+            type="number"
+            step="any"
+            id="latitude"
+            name="latitude"
+            placeholder="e.g. 20.2961"
+        >
+    </div>
+
+    <div>
+        <label class="field-label">Longitude</label>
+        <input
+            type="number"
+            step="any"
+            id="longitude"
+            name="longitude"
+            placeholder="e.g. 85.8245"
+        >
+    </div>
+</div>
+
+<button
+    type="button"
+    class="btn secondary small"
+    onclick="getMyLocation()"
+>
+    Use my current location
+</button>
+<p id="location-message"></p>
+
+<div class="privacy-note">♧ <span><b>Your report, your choice.</b> Avoid uploading identifiable faces, vehicle plates or private information. Your report will appear on the community board.</span></div><button class="btn primary submit-btn" type="submit">Analyse & create report <span>↗</span></button></div>
+<aside class="form-side"><div class="side-icon">✳</div><h3>What CivicLens AI does</h3><ul><li>Understands the issue from text and photos</li><li>Suggests a category and urgency level</li><li>Recommends a municipal function</li><li>Drafts a clear complaint</li><li>Flags details that may be missing</li></ul><div class="side-callout"><b>AI is an assistant, not an authority.</b><p>Review every suggestion before sharing. CivicLens does not automatically file an official government complaint.</p></div><small>Powered by Gemma 4 when an API key is configured.</small></aside></form>{% endblock %}

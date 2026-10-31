@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}{{item.id}}{% endblock %}{% block content %}<div class="detail-wrap"><a class="back" href="/reports">← Back to reports</a><div class="detail-header"><div><div class="eyebrow">TRACKING ID · {{item.id}}</div><h1>{{item.title}}</h1>
+<p>
+    Submitted {{item.created_at.replace('T',' ')}} · ⌖
+
+    {% if item.location and item.location != "Location not provided" %}
+        {{ item.location }}
+
+    {% elif item.latitude is not none and item.longitude is not none %}
+        Coordinates: {{ "%.6f"|format(item.latitude) }},
+        {{ "%.6f"|format(item.longitude) }}
+
+    {% else %}
+        Location not provided
+    {% endif %}
+</p>
+</div><span class="status-pill">{{item.status}}</span></div><div class="detail-grid"><div class="detail-main">{% if item.image_path %}<img class="detail-photo" src="{{url_for('static',filename=item.image_path)}}" alt="Issue evidence">{% endif %}<section class="detail-panel"><div class="eyebrow">AI ANALYSIS</div><div class="report-card-top"><span class="tag">{{item.category}}</span><span class="severity {{item.severity|lower}}">{{item.severity}} priority estimate</span></div><p>{{item.ai_summary}}</p><div class="detail-meta"><div><small>SUGGESTED FUNCTION</small><b>{{item.department}}</b></div><div><small>WARD</small><b>{{item.ward or 'Not provided'}}</b></div></div></section><section class="detail-panel"><div class="eyebrow">COMPLAINT DRAFT · {{item.language}}</div><pre class="complaint">{{item.complaint}}</pre><button class="btn secondary small" onclick="copyText({{item.complaint|tojson}})">Copy complaint</button></section><section class="detail-panel"><div class="eyebrow">HELPFUL DETAILS TO ADD</div><ul class="evidence-list">{% for x in item.missing_evidence|fromjson %}<li>{{x}}</li>{% else %}<li>No additional evidence suggestions.</li>{% endfor %}</ul></section></div><aside class="detail-side"><div class="side-icon">✓</div><h3>Report created</h3><p>Your tracking ID is:</p><div class="tracking-code">{{item.id}}</div><button class="btn secondary small full" onclick="copyText('{{item.id}}')">Copy tracking ID</button><div class="timeline"><div class="timeline-step done"><i></i><b>Submitted</b><small>{{item.created_at.replace('T',' ')}}</small></div><div class="timeline-step {% if item.status in ['Under Review','Assigned','Resolved'] %}done{% endif %}"><i></i><b>Under review</b></div><div class="timeline-step {% if item.status in ['Assigned','Resolved'] %}done{% endif %}"><i></i><b>Assigned</b></div><div class="timeline-step {% if item.status=='Resolved' %}done{% endif %}"><i></i><b>Resolved</b></div></div><small>Prototype tracking only. This is not an official municipal ticket.</small></aside></div></div>{% endblock %}{% block scripts %}<script>function fromjson(){}</script>{% endblock %}

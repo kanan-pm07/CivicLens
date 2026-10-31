@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Community reports{% endblock %}{% block content %}<section class="page-head"><div class="eyebrow">COMMUNITY PULSE</div><h1>Reports from the <em>ground.</em></h1><p>Explore the issues residents have shared. AI labels are suggestions, not verified findings.</p></section><div class="filter-row"><div><a class="filter {% if not selected %}active{% endif %}" href="/reports">All reports</a>{% for s in ['Submitted','Under Review','Assigned','Resolved'] %}<a class="filter {% if selected==s %}active{% endif %}" href="/reports?status={{s}}">{{s}}</a>{% endfor %}</div><a class="btn primary small" href="/report">+ New report</a></div>{% if reports %}<div class="report-grid">{% for r in reports %}<a class="report-card" href="/reports/{{r.id}}"><div class="report-card-top"><span class="tag">{{r.category}}</span><span class="severity {{r.severity|lower}}">{{r.severity}}</span></div><h3>{{r.title}}</h3><p>
+    ⌖
+    {% if r.location and r.location != "Location not provided" %}
+        {{ r.location }}
+    {% elif r.latitude is not none and r.longitude is not none %}
+        Coordinates: {{ "%.6f"|format(r.latitude) }},
+        {{ "%.6f"|format(r.longitude) }}
+    {% else %}
+        Location not provided
+    {% endif %}
+</p><div class="card-foot"><span>{{r.id}}</span><span>{{r.status}} →</span></div></a>{% endfor %}</div>{% else %}<div class="empty"><h3>No reports in this view.</h3><a href="/report" class="btn primary">Submit a report</a></div>{% endif %}{% endblock %}

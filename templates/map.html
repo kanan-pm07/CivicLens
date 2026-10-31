@@ -1,0 +1,206 @@
+
+{% extends "base.html" %}
+
+{% block title %}Civic Issue Map{% endblock %}
+
+{% block content %}
+
+<section class="page-head">
+    <div class="eyebrow">COMMUNITY ISSUE MAP</div>
+    <h1>See what's happening <em>around you.</em></h1>
+    <p>Explore civic issues reported by the community.</p>
+</section>
+
+<div style="margin-bottom:20px">
+    <label class="field-label">Filter by issue</label>
+    <select id="categoryFilter">
+        <option value="">All categories</option>
+        <option>Road damage</option>
+        <option>Waste accumulation</option>
+        <option>Streetlight issue</option>
+        <option>Waterlogging or drainage</option>
+        <option>Water leakage</option>
+        <option>Public infrastructure issue</option>
+        <option>Other</option>
+    </select>
+</div>
+
+<div id="civicMap"
+     style="height:500px; width:100%;
+            border-radius:12px; margin-bottom:20px;">
+</div>
+
+<p id="mapMessage">Loading community reports...</p>
+
+<a href="/reports" class="text-link">
+    View all reports →
+</a>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+
+<script>
+// ========================================
+// 1. INITIALIZE MAP
+// ========================================
+
+const map = L.map("civicMap").setView(
+    [20.2961, 85.8245],
+    12
+);
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }
+).addTo(map);
+
+
+// ========================================
+// 2. INITIALIZE MARKER CLUSTER
+// ========================================
+
+const markerGroup = L.markerClusterGroup({
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true,
+    maxClusterRadius: 45,
+    disableClusteringAtZoom: 19
+});
+
+map.addLayer(markerGroup);
+
+let reports = [];
+
+
+// ========================================
+// 3. HTML ESCAPE FUNCTION
+// ========================================
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+
+// ========================================
+// 4. DISPLAY REPORT MARKERS
+// ========================================
+
+function renderMarkers() {
+
+    markerGroup.clearLayers();
+
+    const selected =
+        document.getElementById("categoryFilter").value;
+
+    const filtered = reports.filter(report => {
+
+        const lat = Number(report.latitude);
+        const lng = Number(report.longitude);
+
+        const validCoordinates =
+            report.latitude !== null &&
+            report.longitude !== null &&
+            report.latitude !== "" &&
+            report.longitude !== "" &&
+            Number.isFinite(lat) &&
+            Number.isFinite(lng) &&
+            lat >= -90 && lat <= 90 &&
+            lng >= -180 && lng <= 180;
+
+        const categoryMatches =
+            !selected || report.category === selected;
+
+        return validCoordinates && categoryMatches;
+    });
+
+    filtered.forEach(report => {
+
+        const marker = L.marker([
+            Number(report.latitude),
+            Number(report.longitude)
+        ]);
+
+        marker.bindPopup(`
+            <b>${escapeHTML(report.title)}</b><br>
+            Category: ${escapeHTML(report.category)}<br>
+            Severity: ${escapeHTML(report.severity)}<br>
+            Status: ${escapeHTML(report.status)}<br><br>
+
+            <a href="/reports/${encodeURIComponent(report.id)}">
+                View report
+            </a>
+        `);
+
+        markerGroup.addLayer(marker);
+    });
+
+    document.getElementById("mapMessage").textContent =
+        filtered.length +
+        " reports displayed on the map.";
+
+    console.log("Total reports:", reports.length);
+    console.log("Valid reports displayed:", filtered.length);
+    console.log("Markers in cluster group:", markerGroup.getLayers().length);
+}
+
+
+// ========================================
+// 5. FETCH REPORTS FROM FLASK API
+// ========================================
+
+fetch("/api/reports")
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error("Could not load reports");
+        }
+
+        return response.json();
+    })
+    .then(data => {
+
+        reports = data;
+
+        console.log("Reports received:", reports);
+
+        renderMarkers();
+
+    })
+    .catch(error => {
+
+        document.getElementById("mapMessage").textContent =
+            "Unable to load reports. Please refresh the page.";
+
+        console.error("Map loading error:", error);
+    });
+
+
+// ========================================
+// 6. CATEGORY FILTER
+// ========================================
+
+document.getElementById("categoryFilter")
+    .addEventListener("change", renderMarkers);
+
+</script>
+
+{% endblock %}
